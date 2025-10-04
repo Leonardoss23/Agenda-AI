@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+        <color name="calendar_background">#2C2C2C</color>
+        <color name="calendar_date_text">#FFFFFF</color>
+        <color name="calendar_weekday_text">#8B5AEB</color>
+        <color name="calendar_focused_month">#8B5AEB</color>
+        <color name="calendar_unfocused_month">#AAAAAA</color>
+        <color name="calendar_week_separator">#4A4A4A</color>
+        <color name="calendar_selected_bar">#FFFFFF</color>
+        <color name="purple_501">#8B5AEB</color>
+        <color name="purple_500">#FF6200EE</color>
+        <color name="purple_700">#FF3700B3</color>
+        <color name="gray_300">#FFE0E0E0</color>
+        <color name="gray_600">#FF757575</color>
+        <color name="red_500">#FFF44336</color>
+
+</resources>

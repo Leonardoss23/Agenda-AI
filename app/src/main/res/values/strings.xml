@@ -1,0 +1,8 @@
+<resources>
+    <!-- Outras strings do seu app podem estar aqui, como o nome do app -->
+    <string name="app_name">Agenda AI</string>
+
+    <!-- Strings para o DrawerLayout (Menu Lateral) -->
+    <string name="navigation_drawer_open">Abrir menu de navegação</string>
+    <string name="navigation_drawer_close">Fechar menu de navegação</string>
+</resources>

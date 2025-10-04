@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Bolinha de fundo -->
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="#8B5AEB" />
+            <size android:width="24dp" android:height="24dp" />
+        </shape>
+    </item>
+    <!-- Número branco sobre a bolinha -->
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="@android:color/transparent" />
+        </shape>
+    </item>
+</layer-list>

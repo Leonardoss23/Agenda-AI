@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Estilo para os dias do mês -->
+    <style name="CalenderViewDate">
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">normal</item>
+    </style>
+
+    <!-- Estilo para o cabeçalho (mês e ano) -->
+    <style name="CalenderViewHeader">
+        <item name="android:textColor">@color/black</item> <!-- Cor verde para mês/ano -->
+        <item name="android:textSize">18sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <!-- Estilo para os dias da semana -->
+    <style name="CalenderViewWeek">
+        <item name="android:textColor">#8B5AEB</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+</resources>
