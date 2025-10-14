@@ -1,6 +1,5 @@
 package com.example.calendario;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -8,31 +7,32 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
 public class PerfilFragment extends Fragment {
 
-    private TextView textViewNomeUsuario, textViewEmailUsuario;
-    private TextView textViewNomeCompleto, textViewTelefone;
-    private Button buttonEditarPerfil, buttonAlterarSenha, buttonSair;
-    private ImageView imageViewPerfil;
+    private ImageView imgPerfil;
+    private ImageButton btnEditarFoto;
+    private TextView txtNomeUsuario, txtEmailUsuario, txtNomeCompleto, txtTelefone, txtDataNascimento;
+    private Button btnEditarPerfil, btnAlterarSenha, btnSair;
 
     private SharedPreferences sharedPreferences;
 
     public PerfilFragment() {
-        // Required empty public constructor
+        // Construtor vazio obrigatório
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Use o layout do fragment_perfil que criamos anteriormente
+        // Infla o layout do fragment (use o nome do XML que você mandou)
         return inflater.inflate(R.layout.fragment_perfil, container, false);
     }
 
@@ -43,78 +43,74 @@ public class PerfilFragment extends Fragment {
         sharedPreferences = requireActivity().getSharedPreferences("user_prefs", requireActivity().MODE_PRIVATE);
 
         initViews(view);
-        setupClickListeners();
         carregarDadosUsuario();
+        setupClickListeners();
     }
 
     private void initViews(View view) {
-        textViewNomeUsuario = view.findViewById(R.id.txtNomeUsuario);
-        textViewEmailUsuario = view.findViewById(R.id.txtEmailUsuario);
-        textViewNomeCompleto = view.findViewById(R.id.txtNomeCompleto);
-        textViewTelefone = view.findViewById(R.id.txtTelefone);
-        buttonEditarPerfil = view.findViewById(R.id.btnEditarPerfil);
-        buttonAlterarSenha = view.findViewById(R.id.btnAlterarSenha);
-        buttonSair = view.findViewById(R.id.btnSair);
-        imageViewPerfil = view.findViewById(R.id.imgPerfil);
-    }
-
-    private void setupClickListeners() {
-        buttonEditarPerfil.setOnClickListener(v -> editarPerfil());
-
-        buttonAlterarSenha.setOnClickListener(v -> alterarSenha());
-
-        buttonSair.setOnClickListener(v -> confirmarSaida());
-
-        imageViewPerfil.setOnClickListener(v -> selecionarFoto());
+        imgPerfil = view.findViewById(R.id.imgPerfil);
+        btnEditarFoto = view.findViewById(R.id.btnEditarFoto);
+        txtNomeUsuario = view.findViewById(R.id.txtNomeUsuario);
+        txtEmailUsuario = view.findViewById(R.id.txtEmailUsuario);
+        txtNomeCompleto = view.findViewById(R.id.txtNomeCompleto);
+        txtTelefone = view.findViewById(R.id.txtTelefone);
+        txtDataNascimento = view.findViewById(R.id.txtDataNascimento);
+        btnEditarPerfil = view.findViewById(R.id.btnEditarPerfil);
+        btnAlterarSenha = view.findViewById(R.id.btnAlterarSenha);
+        btnSair = view.findViewById(R.id.btnSair);
     }
 
     private void carregarDadosUsuario() {
         String nome = sharedPreferences.getString("user_name", "Usuário");
         String email = sharedPreferences.getString("user_email", "email@exemplo.com");
         String telefone = sharedPreferences.getString("user_phone", "(00) 00000-0000");
+        String dataNascimento = sharedPreferences.getString("user_birth", "01/01/2000");
 
-        textViewNomeUsuario.setText(nome);
-        textViewEmailUsuario.setText(email);
-        textViewNomeCompleto.setText(nome);
-        textViewTelefone.setText(telefone);
+        txtNomeUsuario.setText(nome);
+        txtEmailUsuario.setText(email);
+        txtNomeCompleto.setText(nome);
+        txtTelefone.setText(telefone);
+        txtDataNascimento.setText(dataNascimento);
     }
 
-    private void selecionarFoto() {
-        Toast.makeText(getContext(), "Funcionalidade de foto em desenvolvimento", Toast.LENGTH_SHORT).show();
+    private void setupClickListeners() {
+        // Editar foto — placeholder
+        btnEditarFoto.setOnClickListener(v ->
+                Toast.makeText(requireContext(), "Trocar foto (em desenvolvimento)", Toast.LENGTH_SHORT).show()
+        );
+
+        // Editar perfil: abre CadastroActivity em modo edição
+        btnEditarPerfil.setOnClickListener(v -> {
+            Intent intent = new Intent(requireActivity(), CadastroActivity.class);
+            intent.putExtra("modo_edicao", true);
+            startActivity(intent);
+        });
+
+        // Alterar senha: aqui abre uma Activity/dialog futuro (placeholder)
+        btnAlterarSenha.setOnClickListener(v ->
+                Toast.makeText(requireContext(), "Alterar senha (em desenvolvimento)", Toast.LENGTH_SHORT).show()
+        );
+
+        // Logout: limpa sessão e volta pro LoginActivity
+        btnSair.setOnClickListener(v -> {
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.clear(); // remove todos os dados do usuário (ajuste se quiser preservar algo)
+            editor.apply();
+
+            Intent intent = new Intent(requireActivity(), LoginActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            requireActivity().finish();
+        });
     }
 
-    private void editarPerfil() {
-        Toast.makeText(getContext(), "Editar perfil - em desenvolvimento", Toast.LENGTH_SHORT).show();
-    }
-
-    private void alterarSenha() {
-        Toast.makeText(getContext(), "Alterar senha - em desenvolvimento", Toast.LENGTH_SHORT).show();
-    }
-
-    private void confirmarSaida() {
-        new AlertDialog.Builder(requireContext())
-                .setTitle("Sair")
-                .setMessage("Tem certeza que deseja sair da sua conta?")
-                .setPositiveButton("Sim", (dialog, which) -> sairConta())
-                .setNegativeButton("Cancelar", null)
-                .show();
-    }
-
-    private void sairConta() {
-        // Limpar dados de sessão
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean("is_logged_in", false);
-        editor.remove("user_name");
-        editor.remove("user_email");
-        editor.remove("user_phone");
-        editor.apply();
-
-        Toast.makeText(getContext(), "Saindo...", Toast.LENGTH_SHORT).show();
-
-        // Navegar para LoginActivity
-        Intent intent = new Intent(getActivity(), LoginActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
-        requireActivity().finish();
+    // Se você usa cifraDeCesar em outros fragments/activities, pode mover esse método para uma util class.
+    private String cifraDeCesar(String texto, int chave) {
+        if (texto == null) return "";
+        StringBuilder resultado = new StringBuilder();
+        for (char c : texto.toCharArray()) {
+            resultado.append((char) (c + chave));
+        }
+        return resultado.toString();
     }
 }

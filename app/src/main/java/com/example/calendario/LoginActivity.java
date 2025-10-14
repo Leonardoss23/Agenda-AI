@@ -21,11 +21,11 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.fragment_login);
+        setContentView(R.layout.fragment_login); // altere o nome do XML para activity_login.xml
 
         sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
 
-        // Verificar se usuário já está logado
+        // Se o usuário já estiver logado, vai direto para a tela principal
         if (isUserLoggedIn()) {
             startMainActivity();
             return;
@@ -56,9 +56,19 @@ public class LoginActivity extends AppCompatActivity {
         String senha = senhaEditText.getText().toString().trim();
 
         if (validarCampos(email, senha)) {
-            salvarDadosUsuario(email);
-            Toast.makeText(this, "Login realizado com sucesso!", Toast.LENGTH_SHORT).show();
-            startMainActivity();
+            String savedEmail = sharedPreferences.getString("user_email", null);
+            String savedSenhaCriptografada = sharedPreferences.getString("user_senha", null);
+
+            // Criptografa a senha digitada para comparar
+            String senhaCriptografada = cifraDeCesar(senha, 3);
+
+            if (email.equals(savedEmail) && senhaCriptografada.equals(savedSenhaCriptografada)) {
+                salvarDadosUsuario(email);
+                Toast.makeText(this, "Login realizado com sucesso!", Toast.LENGTH_SHORT).show();
+                startMainActivity();
+            } else {
+                Toast.makeText(this, "Email ou senha incorretos", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
@@ -97,5 +107,16 @@ public class LoginActivity extends AppCompatActivity {
         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
         startActivity(intent);
         finish();
+    }
+
+    // ===============================
+    // MÉTODO DE CRIPTOGRAFIA
+    // ===============================
+    private String cifraDeCesar(String texto, int chave) {
+        StringBuilder resultado = new StringBuilder();
+        for (char c : texto.toCharArray()) {
+            resultado.append((char) (c + chave));
+        }
+        return resultado.toString();
     }
 }

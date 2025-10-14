@@ -23,7 +23,7 @@ public class CadastroActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.fragment_cadastro);
+        setContentView(R.layout.fragment_cadastro); // altere o XML se necessário
 
         sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
 
@@ -43,7 +43,6 @@ public class CadastroActivity extends AppCompatActivity {
 
     private void setupClickListeners() {
         cadastrarButton.setOnClickListener(v -> realizarCadastro());
-
         loginTextView.setOnClickListener(v -> finish());
     }
 
@@ -55,7 +54,7 @@ public class CadastroActivity extends AppCompatActivity {
         String confirmarSenha = confirmarSenhaEditText.getText().toString().trim();
 
         if (validarCampos(nome, email, telefone, senha, confirmarSenha)) {
-            salvarUsuario(nome, email, telefone);
+            salvarUsuario(nome, email, telefone, senha);
             Toast.makeText(this, "Cadastro realizado com sucesso!", Toast.LENGTH_SHORT).show();
             finish();
         }
@@ -100,11 +99,25 @@ public class CadastroActivity extends AppCompatActivity {
         return true;
     }
 
-    private void salvarUsuario(String nome, String email, String telefone) {
+    private void salvarUsuario(String nome, String email, String telefone, String senha) {
+        String senhaCriptografada = cifraDeCesar(senha, 3);
+
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString("user_name", nome);
         editor.putString("user_email", email);
         editor.putString("user_phone", telefone);
+        editor.putString("user_senha", senhaCriptografada);
         editor.apply();
+    }
+
+    // ===============================
+    // MÉTODO DE CRIPTOGRAFIA
+    // ===============================
+    private String cifraDeCesar(String texto, int chave) {
+        StringBuilder resultado = new StringBuilder();
+        for (char c : texto.toCharArray()) {
+            resultado.append((char) (c + chave));
+        }
+        return resultado.toString();
     }
 }
