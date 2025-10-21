@@ -1,7 +1,7 @@
 package com.example.calendario;
 
+import android.app.AlertDialog;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,14 +16,24 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
 public class PerfilFragment extends Fragment {
 
     private ImageView imgPerfil;
     private ImageButton btnEditarFoto;
-    private TextView txtNomeUsuario, txtEmailUsuario, txtNomeCompleto, txtTelefone, txtDataNascimento;
-    private Button btnEditarPerfil, btnAlterarSenha, btnSair;
+    private TextView txtNomeUsuario, txtEmailUsuario, txtTelefone, txtNomeCompleto;
+    private Button btnAlterarSenha, btnSair;
 
-    private SharedPreferences sharedPreferences;
+    private FirebaseAuth auth;
+    private FirebaseUser user;
+    private DatabaseReference usuariosRef;
 
     public PerfilFragment() {
         // Construtor vazio obrigatório
@@ -32,7 +42,6 @@ public class PerfilFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Infla o layout do fragment (use o nome do XML que você mandou)
         return inflater.inflate(R.layout.fragment_perfil, container, false);
     }
 
@@ -40,7 +49,9 @@ public class PerfilFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        sharedPreferences = requireActivity().getSharedPreferences("user_prefs", requireActivity().MODE_PRIVATE);
+        auth = FirebaseAuth.getInstance();
+        user = auth.getCurrentUser();
+        usuariosRef = FirebaseDatabase.getInstance().getReference("usuarios");
 
         initViews(view);
         carregarDadosUsuario();
@@ -52,65 +63,76 @@ public class PerfilFragment extends Fragment {
         btnEditarFoto = view.findViewById(R.id.btnEditarFoto);
         txtNomeUsuario = view.findViewById(R.id.txtNomeUsuario);
         txtEmailUsuario = view.findViewById(R.id.txtEmailUsuario);
-        txtNomeCompleto = view.findViewById(R.id.txtNomeCompleto);
         txtTelefone = view.findViewById(R.id.txtTelefone);
-        txtDataNascimento = view.findViewById(R.id.txtDataNascimento);
-        btnEditarPerfil = view.findViewById(R.id.btnEditarPerfil);
+        txtNomeCompleto = view.findViewById(R.id.txtNomeCompleto);
         btnAlterarSenha = view.findViewById(R.id.btnAlterarSenha);
         btnSair = view.findViewById(R.id.btnSair);
     }
 
     private void carregarDadosUsuario() {
-        String nome = sharedPreferences.getString("user_name", "Usuário");
-        String email = sharedPreferences.getString("user_email", "email@exemplo.com");
-        String telefone = sharedPreferences.getString("user_phone", "(00) 00000-0000");
-        String dataNascimento = sharedPreferences.getString("user_birth", "01/01/2000");
+        if (user == null) {
+            Toast.makeText(requireContext(), "Usuário não autenticado", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        txtNomeUsuario.setText(nome);
-        txtEmailUsuario.setText(email);
-        txtNomeCompleto.setText(nome);
-        txtTelefone.setText(telefone);
-        txtDataNascimento.setText(dataNascimento);
+        String userId = user.getUid();
+
+        usuariosRef.child(userId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (!snapshot.exists()) {
+                    Toast.makeText(requireContext(), "Usuário não encontrado no banco de dados.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                String nome = snapshot.child("nome").getValue(String.class);
+                String email = snapshot.child("email").getValue(String.class);
+                String telefone = snapshot.child("telefone").getValue(String.class);
+
+                // Exibir os dados vindos do Firebase
+                txtNomeUsuario.setText(nome != null ? nome : "Usuário");
+                txtNomeCompleto.setText(nome != null ? nome : "Usuário");
+                txtEmailUsuario.setText(email != null ? email : "email@exemplo.com");
+                txtTelefone.setText(telefone != null ? telefone : "(00) 00000-0000");
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(requireContext(), "Erro: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void setupClickListeners() {
-        // Editar foto — placeholder
         btnEditarFoto.setOnClickListener(v ->
                 Toast.makeText(requireContext(), "Trocar foto (em desenvolvimento)", Toast.LENGTH_SHORT).show()
         );
 
-        // Editar perfil: abre CadastroActivity em modo edição
-        btnEditarPerfil.setOnClickListener(v -> {
-            Intent intent = new Intent(requireActivity(), CadastroActivity.class);
-            intent.putExtra("modo_edicao", true);
-            startActivity(intent);
+        btnAlterarSenha.setOnClickListener(v -> {
+            if (user != null && user.getEmail() != null) {
+                String email = user.getEmail();
+                auth.sendPasswordResetEmail(email)
+                        .addOnSuccessListener(aVoid ->
+                                new AlertDialog.Builder(requireContext())
+                                        .setTitle("E-mail enviado!")
+                                        .setMessage("Um link para redefinir sua senha foi enviado para:\n" + email)
+                                        .setPositiveButton("OK", null)
+                                        .show()
+                        )
+                        .addOnFailureListener(e ->
+                                Toast.makeText(requireContext(), "Erro: " + e.getMessage(), Toast.LENGTH_LONG).show()
+                        );
+            } else {
+                Toast.makeText(requireContext(), "Usuário não autenticado", Toast.LENGTH_SHORT).show();
+            }
         });
 
-        // Alterar senha: aqui abre uma Activity/dialog futuro (placeholder)
-        btnAlterarSenha.setOnClickListener(v ->
-                Toast.makeText(requireContext(), "Alterar senha (em desenvolvimento)", Toast.LENGTH_SHORT).show()
-        );
-
-        // Logout: limpa sessão e volta pro LoginActivity
         btnSair.setOnClickListener(v -> {
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.clear(); // remove todos os dados do usuário (ajuste se quiser preservar algo)
-            editor.apply();
-
+            auth.signOut();
             Intent intent = new Intent(requireActivity(), LoginActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
             requireActivity().finish();
         });
-    }
-
-    // Se você usa cifraDeCesar em outros fragments/activities, pode mover esse método para uma util class.
-    private String cifraDeCesar(String texto, int chave) {
-        if (texto == null) return "";
-        StringBuilder resultado = new StringBuilder();
-        for (char c : texto.toCharArray()) {
-            resultado.append((char) (c + chave));
-        }
-        return resultado.toString();
     }
 }

@@ -2,7 +2,6 @@ package com.example.calendario;
 
 import android.app.DatePickerDialog;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Switch;
@@ -11,6 +10,9 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -28,12 +30,14 @@ public class AdicionarTarefaActivity extends AppCompatActivity {
     private AgendaViewModel viewModel;
     private long selectedDateInMillis;
 
+    private FirebaseFirestore db;
+    private String userId;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_adicionar_tarefa);
 
-        // Vincula as visualizações do layout usando os IDs corretos do XML
         titleEditText = findViewById(R.id.edit_text_title);
         descriptionEditText = findViewById(R.id.edit_text_description);
         estimatedTimeEditText = findViewById(R.id.edit_text_estimated_time);
@@ -41,13 +45,15 @@ public class AdicionarTarefaActivity extends AppCompatActivity {
         urgentSwitch = findViewById(R.id.switch_urgente);
         saveButton = findViewById(R.id.button_save);
 
-        // Inicializa o ViewModel
         viewModel = new ViewModelProvider(this).get(AgendaViewModel.class);
 
-        // Define o clique no TextView para abrir o DatePickerDialog
-        dateTextView.setOnClickListener(v -> showDatePicker());
+        // Inicializa Firestore e pega ID do usuário logado
+        db = FirebaseFirestore.getInstance();
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        }
 
-        // Configura o botão de salvar
+        dateTextView.setOnClickListener(v -> showDatePicker());
         saveButton.setOnClickListener(v -> salvarTarefa());
     }
 
@@ -74,13 +80,11 @@ public class AdicionarTarefaActivity extends AppCompatActivity {
         String estimatedTimeStr = estimatedTimeEditText.getText().toString().trim();
         boolean isUrgent = urgentSwitch.isChecked();
 
-        // Validação básica dos campos
         if (title.isEmpty() || selectedDateInMillis == 0) {
             Toast.makeText(this, "Título e prazo são obrigatórios.", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Converte o tempo estimado para int, se não for vazio
         int estimatedTime = 0;
         if (!estimatedTimeStr.isEmpty()) {
             try {
@@ -91,11 +95,22 @@ public class AdicionarTarefaActivity extends AppCompatActivity {
             }
         }
 
-        // Cria e salva a nova tarefa
+        // Cria o objeto Task
         Task novaTarefa = new Task(title, description, selectedDateInMillis, isUrgent, false);
+
+        // 1️⃣ Salva localmente no ViewModel
         viewModel.insert(novaTarefa);
 
-        Toast.makeText(this, "Tarefa salva com sucesso!", Toast.LENGTH_SHORT).show();
+        // 2️⃣ Salva no Firestore (coleção "tarefas/userId/minhasTarefas")
+        if (userId != null) {
+            db.collection("tarefas")
+                    .document(userId)
+                    .collection("minhasTarefas")
+                    .add(novaTarefa)
+                    .addOnSuccessListener(docRef -> Toast.makeText(this, "Tarefa salva com sucesso!", Toast.LENGTH_SHORT).show())
+                    .addOnFailureListener(e -> Toast.makeText(this, "Erro ao salvar tarefa: " + e.getMessage(), Toast.LENGTH_LONG).show());
+        }
+
         finish();
     }
 }

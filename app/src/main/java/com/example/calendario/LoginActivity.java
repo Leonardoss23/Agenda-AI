@@ -1,7 +1,6 @@
 package com.example.calendario;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -9,27 +8,22 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.firebase.auth.FirebaseAuth;
+
 public class LoginActivity extends AppCompatActivity {
 
-    private EditText emailEditText;
-    private EditText senhaEditText;
+    private EditText emailEditText, senhaEditText;
     private Button loginButton;
     private TextView cadastrarTextView;
 
-    private SharedPreferences sharedPreferences;
+    private FirebaseAuth auth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.fragment_login); // altere o nome do XML para activity_login.xml
+        setContentView(R.layout.fragment_login); // ou activity_login.xml
 
-        sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
-
-        // Se o usuário já estiver logado, vai direto para a tela principal
-        if (isUserLoggedIn()) {
-            startMainActivity();
-            return;
-        }
+        auth = FirebaseAuth.getInstance();
 
         initViews();
         setupClickListeners();
@@ -55,68 +49,20 @@ public class LoginActivity extends AppCompatActivity {
         String email = emailEditText.getText().toString().trim();
         String senha = senhaEditText.getText().toString().trim();
 
-        if (validarCampos(email, senha)) {
-            String savedEmail = sharedPreferences.getString("user_email", null);
-            String savedSenhaCriptografada = sharedPreferences.getString("user_senha", null);
-
-            // Criptografa a senha digitada para comparar
-            String senhaCriptografada = cifraDeCesar(senha, 3);
-
-            if (email.equals(savedEmail) && senhaCriptografada.equals(savedSenhaCriptografada)) {
-                salvarDadosUsuario(email);
-                Toast.makeText(this, "Login realizado com sucesso!", Toast.LENGTH_SHORT).show();
-                startMainActivity();
-            } else {
-                Toast.makeText(this, "Email ou senha incorretos", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
-    private boolean validarCampos(String email, String senha) {
-        if (email.isEmpty()) {
-            Toast.makeText(this, "Digite seu email", Toast.LENGTH_SHORT).show();
-            return false;
+        if (email.isEmpty() || senha.isEmpty()) {
+            Toast.makeText(this, "Preencha todos os campos", Toast.LENGTH_SHORT).show();
+            return;
         }
 
-        if (senha.isEmpty()) {
-            Toast.makeText(this, "Digite sua senha", Toast.LENGTH_SHORT).show();
-            return false;
-        }
-
-        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            Toast.makeText(this, "Digite um email válido", Toast.LENGTH_SHORT).show();
-            return false;
-        }
-
-        return true;
-    }
-
-    private boolean isUserLoggedIn() {
-        return sharedPreferences.getBoolean("is_logged_in", false);
-    }
-
-    private void salvarDadosUsuario(String email) {
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean("is_logged_in", true);
-        editor.putString("user_email", email);
-        editor.putString("user_name", email.split("@")[0]);
-        editor.apply();
-    }
-
-    private void startMainActivity() {
-        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-        startActivity(intent);
-        finish();
-    }
-
-    // ===============================
-    // MÉTODO DE CRIPTOGRAFIA
-    // ===============================
-    private String cifraDeCesar(String texto, int chave) {
-        StringBuilder resultado = new StringBuilder();
-        for (char c : texto.toCharArray()) {
-            resultado.append((char) (c + chave));
-        }
-        return resultado.toString();
+        auth.signInWithEmailAndPassword(email, senha)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Toast.makeText(this, "Login realizado com sucesso!", Toast.LENGTH_SHORT).show();
+                        startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                        finish();
+                    } else {
+                        Toast.makeText(this, "Erro no login: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 }

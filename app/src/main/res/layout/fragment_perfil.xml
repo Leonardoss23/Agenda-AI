@@ -9,34 +9,43 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="24dp">
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
+        android:paddingTop="32dp"
+        android:paddingBottom="48dp">
 
         <!-- Header do Perfil -->
-        <RelativeLayout
-            android:layout_width="match_parent"
+        <FrameLayout
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:layout_marginBottom="32dp">
 
+            <!-- Foto de perfil -->
             <ImageView
                 android:id="@+id/imgPerfil"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
                 android:src="@drawable/ic_person"
                 android:background="@drawable/circle_background"
-                android:layout_centerHorizontal="true" />
+                android:layout_gravity="center" />
 
+            <!-- Botão de editar foto (no canto inferior direito da imagem) -->
             <ImageButton
                 android:id="@+id/btnEditarFoto"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:src="@drawable/ic_person"
+                android:layout_width="50dp"
+                android:layout_height="48dp"
+                android:layout_gravity="bottom|end"
+                android:layout_marginEnd="4dp"
+                android:layout_marginBottom="4dp"
                 android:background="@drawable/circle_accent"
-                android:layout_alignBottom="@id/imgPerfil"
-                android:layout_alignEnd="@id/imgPerfil"
-                android:layout_marginEnd="-8dp" />
+                android:contentDescription="Editar foto de perfil"
+                android:padding="6dp"
+                android:scaleType="centerInside"
+                android:src="@drawable/circle_accent" />
+        </FrameLayout>
 
-        </RelativeLayout>
-
+        <!-- Nome e Email -->
         <TextView
             android:id="@+id/txtNomeUsuario"
             android:layout_width="wrap_content"
@@ -46,7 +55,7 @@
             android:textStyle="bold"
             android:textColor="@color/black"
             android:layout_gravity="center"
-            android:layout_marginBottom="8dp" />
+            android:layout_marginBottom="4dp" />
 
         <TextView
             android:id="@+id/txtEmailUsuario"
@@ -56,9 +65,9 @@
             android:textSize="14sp"
             android:textColor="@color/gray_600"
             android:layout_gravity="center"
-            android:layout_marginBottom="32dp" />
+            android:layout_marginBottom="40dp" />
 
-        <!-- Seção de Informações Pessoais -->
+        <!-- Título -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -66,12 +75,13 @@
             android:textSize="18sp"
             android:textStyle="bold"
             android:textColor="@color/black"
-            android:layout_marginBottom="16dp" />
+            android:layout_marginBottom="20dp" />
 
+        <!-- Card com dados -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp"
+            android:layout_marginBottom="36dp"
             app:cardCornerRadius="12dp"
             app:cardElevation="2dp">
 
@@ -79,7 +89,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:padding="18dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -102,37 +112,6 @@
                         android:text="João da Silva"
                         android:textColor="@color/black"
                         android:textAlignment="textEnd" />
-
-                </LinearLayout>
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@color/gray_300"
-                    android:layout_marginBottom="12dp" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginBottom="12dp">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Telefone"
-                        android:textColor="@color/gray_600" />
-
-                    <TextView
-                        android:id="@+id/txtTelefone"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="(11) 99999-9999"
-                        android:textColor="@color/black"
-                        android:textAlignment="textEnd" />
-
                 </LinearLayout>
 
                 <View
@@ -150,54 +129,46 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Data de nascimento"
+                        android:text="Telefone"
                         android:textColor="@color/gray_600" />
 
                     <TextView
-                        android:id="@+id/txtDataNascimento"
+                        android:id="@+id/txtTelefone"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="15/03/1990"
+                        android:text="(11) 99999-9999"
                         android:textColor="@color/black"
                         android:textAlignment="textEnd" />
-
                 </LinearLayout>
 
             </LinearLayout>
-
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Botões de Ação -->
-        <Button
-            android:id="@+id/btnEditarPerfil"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Editar Perfil"
-            android:textSize="16sp"
-            android:backgroundTint="@color/purple_500"
-            android:textColor="@color/white"
-            android:layout_marginBottom="12dp" />
-
+        <!-- Botões -->
         <Button
             android:id="@+id/btnAlterarSenha"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Alterar Senha"
+            android:text="ALTERAR SENHA"
+            android:textAllCaps="true"
             android:textSize="16sp"
+            android:textStyle="bold"
             android:backgroundTint="@color/white"
             android:textColor="@color/purple_500"
-            android:layout_marginBottom="12dp" />
+            android:layout_marginBottom="16dp"
+            android:elevation="2dp" />
 
         <Button
             android:id="@+id/btnSair"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Sair"
+            android:text="SAIR"
+            android:textAllCaps="true"
             android:textSize="16sp"
+            android:textStyle="bold"
             android:backgroundTint="@color/white"
-            android:textColor="@color/red_500" />
-
+            android:textColor="@color/red_500"
+            android:elevation="2dp" />
     </LinearLayout>
-
 </ScrollView>
