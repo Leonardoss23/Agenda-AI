@@ -26,7 +26,7 @@ public class CadastroActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.fragment_cadastro); // ou activity_cadastro.xml
+        setContentView(R.layout.fragment_cadastro); // ou o XML correto
 
         auth = FirebaseAuth.getInstance();
         usuariosRef = FirebaseDatabase.getInstance().getReference("usuarios");
@@ -47,29 +47,31 @@ public class CadastroActivity extends AppCompatActivity {
 
     private void setupClickListeners() {
         cadastrarButton.setOnClickListener(v -> {
-            // 1️⃣ Mostra o alerta imediatamente
+            // Mostra o alerta imediatamente ao clicar
             new AlertDialog.Builder(CadastroActivity.this)
                     .setTitle("Cadastro realizado com sucesso!")
-                    .setMessage("Sua conta foi criada com sucesso! Clique no botão abaixo para voltar à tela de login.")
+                    .setMessage("Sua conta foi criada com sucesso! Clique abaixo para voltar à tela de login.")
                     .setPositiveButton("Ir para Login", (dialog, which) -> {
-                        // Vai para LoginActivity
+                        // Vai direto pra tela de login
                         startActivity(new Intent(CadastroActivity.this, LoginActivity.class));
                         finish();
                     })
                     .setCancelable(false)
                     .show();
 
-            // 2️⃣ Continua com o cadastro no Firebase
+            // Executa o cadastro no Firebase normalmente
             realizarCadastroFirebase();
         });
 
-        loginTextView.setOnClickListener(v -> finish());
+        loginTextView.setOnClickListener(v -> {
+            startActivity(new Intent(CadastroActivity.this, LoginActivity.class));
+            finish();
+        });
     }
 
-    // Função que realiza o cadastro no Firebase normalmente
     private void realizarCadastroFirebase() {
         String nome = nomeEditText.getText().toString().trim();
-        String email = emailEditText.getText().toString().trim();
+        String email = emailEditText.getText().toString().trim().toLowerCase(); // força letras minúsculas
         String telefone = telefoneEditText.getText().toString().trim();
         String senha = senhaEditText.getText().toString().trim();
         String confirmarSenha = confirmarSenhaEditText.getText().toString().trim();
@@ -81,15 +83,25 @@ public class CadastroActivity extends AppCompatActivity {
                     if (task.isSuccessful() && auth.getCurrentUser() != null) {
                         String userId = auth.getCurrentUser().getUid();
                         String senhaCriptografada = cifraDeCesar(senha, 3);
+
                         Usuario usuario = new Usuario(nome, email, telefone, senhaCriptografada);
                         usuariosRef.child(userId).setValue(usuario)
-                                .addOnFailureListener(e -> Toast.makeText(CadastroActivity.this, "Erro ao salvar dados: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                                .addOnFailureListener(e -> Toast.makeText(
+                                        CadastroActivity.this,
+                                        "Erro ao salvar dados: " + e.getMessage(),
+                                        Toast.LENGTH_SHORT
+                                ).show());
                     } else {
-                        String mensagem = (task.getException() != null) ? task.getException().getMessage() : "Erro ao criar usuário";
+                        String mensagem = (task.getException() != null)
+                                ? task.getException().getMessage()
+                                : "Erro ao criar usuário";
                         Toast.makeText(CadastroActivity.this, mensagem, Toast.LENGTH_LONG).show();
                     }
                 })
-                .addOnFailureListener(e -> Toast.makeText(CadastroActivity.this, "Erro no cadastro: " + e.getMessage(), Toast.LENGTH_LONG).show());
+                .addOnFailureListener(e ->
+                        Toast.makeText(CadastroActivity.this,
+                                "Erro no cadastro: " + e.getMessage(),
+                                Toast.LENGTH_LONG).show());
     }
 
     private boolean validarCampos(String nome, String email, String telefone, String senha, String confirmarSenha) {

@@ -21,7 +21,7 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.fragment_login); // ou activity_login.xml
+        setContentView(R.layout.fragment_login); // ou o XML correto da tela de login
 
         auth = FirebaseAuth.getInstance();
 
@@ -46,7 +46,8 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void fazerLogin() {
-        String email = emailEditText.getText().toString().trim();
+        // 🔹 Força o e-mail para minúsculas antes do login
+        String email = emailEditText.getText().toString().trim().toLowerCase();
         String senha = senhaEditText.getText().toString().trim();
 
         if (email.isEmpty() || senha.isEmpty()) {
@@ -61,7 +62,10 @@ public class LoginActivity extends AppCompatActivity {
                         startActivity(new Intent(LoginActivity.this, MainActivity.class));
                         finish();
                     } else {
-                        Toast.makeText(this, "Erro no login: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                        String erro = (task.getException() != null)
+                                ? task.getException().getMessage()
+                                : "Erro desconhecido ao fazer login";
+                        Toast.makeText(this, "Erro no login: " + erro, Toast.LENGTH_LONG).show();
                     }
                 });
     }
